@@ -7,7 +7,7 @@ Example
 ========
 
     l := TLog.Logger{}
-    l.StarTrace("Enable", "tracing")
+    l.StartTrace("Enable", "tracing")
 
 ...
 
