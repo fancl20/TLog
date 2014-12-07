@@ -50,6 +50,7 @@ func (l *Logger) Start(args ...interface{}) {
 	if l.inTrace {
 		id := l.traceID
 		l.setTraceID()
+		//Caller -> Start
 		str := l.getLogHead(1)
 		str += fmt.Sprintf("[Start From %d] ", id)
 		str += l.getLogContent(args...)
@@ -59,6 +60,7 @@ func (l *Logger) Start(args ...interface{}) {
 
 func (l *Logger) End(args ...interface{}) {
 	if l.inTrace {
+		//Caller -> End
 		str := l.getLogHead(1)
 		str += "[End] "
 		str += l.getLogContent(args...)
@@ -68,7 +70,7 @@ func (l *Logger) End(args ...interface{}) {
 
 func (l *Logger) Log(args ...interface{}) {
 	if l.inTrace {
-		//Caller -> LogFunc -> logWithSkip
+		//Caller -> Log
 		str := l.getLogHead(1)
 		str += "[Log] "
 		str += l.getLogContent(args...)
