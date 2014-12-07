@@ -7,7 +7,14 @@ import (
 	"time"
 )
 
-type Logger struct {
+type Logger interface {
+	StartTrace(args ...interface{})
+	Start(args ...interface{})
+	End(args ...interface{})
+	Log(args ...interface{})
+}
+
+type LoggerImpl struct {
 	traceID int32
 	inTrace bool
 }
@@ -16,11 +23,15 @@ func init() {
 	rand.Seed(time.Now().Unix())
 }
 
-func (l *Logger) setTraceID() {
+func NewLogger() *LoggerImpl {
+	return new(LoggerImpl)
+}
+
+func (l *LoggerImpl) setTraceID() {
 	l.traceID = rand.Int31()
 }
 
-func (l *Logger) getLogHead(skip int) string {
+func (l *LoggerImpl) getLogHead(skip int) string {
 	pc, file, line, _ := runtime.Caller(skip + 1)
 	funcName := runtime.FuncForPC(pc).Name()
 	timeStr := time.Now().UTC().Format(time.RFC822)
@@ -28,7 +39,7 @@ func (l *Logger) getLogHead(skip int) string {
 	return str
 }
 
-func (l *Logger) getLogContent(args ...interface{}) string {
+func (l *LoggerImpl) getLogContent(args ...interface{}) string {
 	str := ""
 	for _, arg := range args {
 		str += fmt.Sprintf("%+v ", arg)
@@ -36,7 +47,7 @@ func (l *Logger) getLogContent(args ...interface{}) string {
 	return str
 }
 
-func (l *Logger) StartTrace(args ...interface{}) {
+func (l *LoggerImpl) StartTrace(args ...interface{}) {
 	l.inTrace = true
 	l.setTraceID()
 	//Caller -> StartTrace
@@ -46,7 +57,7 @@ func (l *Logger) StartTrace(args ...interface{}) {
 	fmt.Println(str)
 }
 
-func (l *Logger) Start(args ...interface{}) {
+func (l *LoggerImpl) Start(args ...interface{}) {
 	if l.inTrace {
 		id := l.traceID
 		l.setTraceID()
@@ -58,7 +69,7 @@ func (l *Logger) Start(args ...interface{}) {
 	}
 }
 
-func (l *Logger) End(args ...interface{}) {
+func (l *LoggerImpl) End(args ...interface{}) {
 	if l.inTrace {
 		//Caller -> End
 		str := l.getLogHead(1)
@@ -68,7 +79,7 @@ func (l *Logger) End(args ...interface{}) {
 	}
 }
 
-func (l *Logger) Log(args ...interface{}) {
+func (l *LoggerImpl) Log(args ...interface{}) {
 	if l.inTrace {
 		//Caller -> Log
 		str := l.getLogHead(1)
